@@ -1,5 +1,6 @@
 package pl.brych.carservice.controller;
 
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pl.brych.carservice.model.Car;
@@ -22,13 +23,15 @@ public class CarController {
     }
 
     @GetMapping("/cars")
-    public List<Car> getCars() {
-        return (List<Car>) carRepository.findAll();
+    public ResponseEntity<List<Car>> getCars() {
+        List<Car> carList = (List<Car>) carRepository.findAll();
+        return ResponseEntity.ok(carList);
     }
 
     @PostMapping("/cars")
-    public void addCar(@RequestBody Car car) {
-        carRepository.save(car);
+    public ResponseEntity<Car> addCar(@RequestBody Car car) {
+        Car newCar = carRepository.save(car);
+        return ResponseEntity.ok(newCar);
     }
 
     @GetMapping("/cars/{id}")
@@ -41,7 +44,7 @@ public class CarController {
         }
     }
 
-    @GetMapping("/cars/{color}")
+    @GetMapping("/cars/color/{color}")
     public ResponseEntity<List<Car>> getCarsByColor(@PathVariable String color) {
 
         List<Car> cars = carService.getCarsByColorService(color);
@@ -52,4 +55,32 @@ public class CarController {
             return ResponseEntity.ok(cars);
         }
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Car> deleteCar(@PathVariable Long id) {
+        Optional<Car> first = carRepository.findById(id);
+        if (first.isPresent()) {
+            carRepository.deleteById(id);
+            return ResponseEntity.ok(first.get());
+        } else return ResponseEntity.notFound().build();
+    }
+
+//    @PatchMapping("/{id}")
+//    public ResponseEntity<?> modOneCarField(@RequestParam("color") String newColor, @PathVariable("id") Integer id) {
+//        Optional<Car> first = carServiceImp.getCarByIdService(id);
+//        if (first.isPresent()) {
+//            carServiceImp.getAllCarsService().get(id - 1).setColor(newColor);
+//            return ResponseEntity.ok().build();
+//        } else return ResponseEntity.notFound().build();
+//    }
+//
+//    @PutMapping
+//    public ResponseEntity<Car> modCar(@RequestBody Car newCar) {
+//        Optional<Car> first = carServiceImp.getCarByIdService(newCar.getId());
+//        if (first.isPresent()) {
+//            carServiceImp.getAllCarsService().remove(first.get());
+//            carServiceImp.getAllCarsService().add(newCar);
+//            return ResponseEntity.ok().build();
+//        } else return ResponseEntity.notFound().build();
+//    }
 }
